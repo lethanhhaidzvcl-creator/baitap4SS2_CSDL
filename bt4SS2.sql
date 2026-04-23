@@ -1,17 +1,58 @@
-USE it202_k25_ss2; 
+-- =========================================
+-- 1. TẠO DATABASE
+-- =========================================
+CREATE DATABASE IF NOT EXISTS DemoTradeOff;
+USE DemoTradeOff;
 
-CREATE TABLE users (
-    user_id INT PRIMARY KEY AUTO_INCREMENT,
-    full_name VARCHAR(255) NOT NULL, 
-    phone INT,
-    email VARCHAR(255) UNIQUE, 
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- =========================================
+-- 2. TẠO BẢNG USERS (SAI THIẾT KẾ BAN ĐẦU)
+-- Phone đang là INT (gây lỗi mất số 0 đầu)
+-- =========================================
+CREATE TABLE USERS (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    phone INT
 );
 
--- C1: Dùng ALER TABLE MODIFY ĐỂ THAY THAY INT THÀNH PHONE SAU ĐÓ DÙNG UPDATE ĐỂ THÊM SỐ 0 VÀO ĐẦU -> APP SẼ BỊ TREO 1 TÍ
-ALTER TABLE users 
-MODIFY phone VARCHAR(15) NOT NULL UNIQUE;
--- UPDATE EM CHƯA HỌC NÀO HỌC RỒI THÌ EM CHỈNH SAU Ạ 
- 
--- C2: THÊM 1 CỘT MỚI CHUYỂN DỮ LIỆU QUA RỒI CŨNG DÙNG CHECK ĐỂ THÊM 0 VÀO ĐẦU SAU KHI ỔN ĐỊNH THÌ XÓA CỘT CŨ 
--- -> APP VẪN CHẠY BÌNH THƯỜNG => DÙNG C1 VÌ ĐẰNG NÀO NGƯỜI DÙNG CŨNG CÓ ĐĂNG NHẬP ĐƯỢC ĐÂU.. 
+-- =========================================
+-- 3. INSERT DỮ LIỆU MẪU
+-- (giả lập số điện thoại có số 0 đầu)
+-- =========================================
+INSERT INTO USERS (name, phone) VALUES
+('Nguyen Van A', 0981234567),
+('Tran Thi B', 0909876543),
+('Le Van C', 0123456789);
+
+-- =========================================
+-- 4. KIỂM TRA LỖI (bạn sẽ thấy mất số 0)
+-- =========================================
+SELECT * FROM USERS;
+
+-- =========================================
+-- 5. GIẢI PHÁP: MIGRATION AN TOÀN
+-- =========================================
+
+-- 5.1 Thêm cột mới đúng chuẩn
+ALTER TABLE USERS
+ADD phone_new VARCHAR(15);
+
+-- 5.2 Copy dữ liệu từ INT -> VARCHAR
+UPDATE USERS
+SET phone_new = CAST(phone AS CHAR);
+
+-- =========================================
+-- 6. KIỂM TRA SAU KHI COPY
+-- =========================================
+SELECT * FROM USERS;
+
+-- =========================================
+-- 7. DROP CỘT CŨ + ĐỔI CỘT MỚI THÀNH CHÍNH THỨC
+-- =========================================
+ALTER TABLE USERS DROP COLUMN phone;
+
+ALTER TABLE USERS CHANGE phone_new phone VARCHAR(15);
+
+-- =========================================
+-- 8. KIỂM TRA CUỐI CÙNG
+-- =========================================
+SELECT * FROM USERS;
